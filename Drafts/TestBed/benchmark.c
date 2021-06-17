@@ -10,6 +10,7 @@
 
 #include <cblas.h>
 #include <libxsmm.h>
+#include <libxsmm_main.h>
 
 #include "common.h"
 #include "xsmm_common.h"
@@ -58,7 +59,15 @@ int main(void) {
   printf("%s", "Running XSMM Reference MM...\n");
   double *c_xsmm_d = (double *) calloc(c_size, sizeof(double));
   libxsmm_dfsspmdm *xsmm_d = libxsmm_dfsspmdm_create(m, BLOCK_ALIGNMENT, k, lda, ldb, ldc, alpha, beta, 1, a_d);
+
+  // Check kernel type
+  print_libxsmm_dfsspmdm(xsmm_d);
+  // if ( xsmm_d->a_dense != NULL ) {
+  //   ;
+  // }
+
   struct benchmark_data b_data = benchmark_xsmm(b_d, c_xsmm_d, n, xsmm_d);
+
 
   printf("%s", "Done.\n");
   printf("---------------------------------------------------------------\n");

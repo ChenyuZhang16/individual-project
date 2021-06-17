@@ -8,6 +8,7 @@
 
 #include "common.h"
 #include <libxsmm.h>
+#include <libxsmm_main.h>
 
 void exec_xsmm(const double *b, double *c, int n, const libxsmm_dfsspmdm *xsmm_d);
 

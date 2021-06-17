@@ -2,6 +2,8 @@
 #define BENCHMARK_COMMON_H
 
 #include <stdbool.h>
+#include <libxsmm.h>
+#include <libxsmm_main.h>
 
 #define MAX_REPS 60
 
@@ -36,5 +38,7 @@ void print_matrix_d(double *matrix, int size, int rowlen);
 void verify_d(double *c, double *c_naive, int b_num_col, int c_size);
 
 int cmpfunc(const void * a, const void * b);
+
+void print_libxsmm_dfsspmdm(libxsmm_dfsspmdm const* const handle);
 
 #endif // BENCHMARK_COMMON_H

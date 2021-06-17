@@ -6,6 +6,8 @@
 #include <float.h>
 #include <assert.h>
 #include "common.h"
+#include <libxsmm.h>
+#include <libxsmm_main.h>
 
 #define DEBUG 0
 
@@ -183,4 +185,12 @@ int cmpfunc (const void * a, const void * b) {
   if (*(double*)a > *(double*)b) return 1;
   else if (*(double*)a < *(double*)b) return -1;
   else return 0;  
+}
+
+void print_libxsmm_dfsspmdm(libxsmm_dfsspmdm const* const handle) {
+  printf("M = %d, N = %d, K = %d\n", handle->M, handle->N, handle->K);
+  printf("ldb = %d, ldc = %d\n", handle->ldb, handle->ldc);
+  printf("N_chunksize = %d\n", handle->N_chunksize);
+  printf("a_dense = %p\n", handle->a_dense);
+  printf("&(handle->kernel) = %p\n", &(handle->kernel));
 }
