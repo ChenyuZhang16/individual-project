@@ -62,9 +62,23 @@ int main(void) {
 
   // Check kernel type
   print_libxsmm_dfsspmdm(xsmm_d);
-  // if ( xsmm_d->a_dense != NULL ) {
-  //   ;
-  // }
+
+  printf("kernel type: ");
+  if ( xsmm_d->a_dense != NULL ) {
+    printf("dense");
+  } else {
+    int const N_vec_reg_dp = libxsmm_cpuid_vlen32(libxsmm_cpuid()) / 2;
+
+    if ( xsmm_d->N_chunksize == N_vec_reg_dp ) {
+      printf("sparse");
+    } else if ( xsmm_d->N_chunksize == 2*N_vec_reg_dp ) {
+      printf("wide-sparse");
+    } else {
+      printf("undefined");
+    }
+  }
+  printf("\n");
+
 
   struct benchmark_data b_data = benchmark_xsmm(b_d, c_xsmm_d, n, xsmm_d);
 
