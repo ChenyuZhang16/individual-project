@@ -41,4 +41,8 @@ int cmpfunc(const void * a, const void * b);
 
 void print_libxsmm_dfsspmdm(libxsmm_dfsspmdm const* const handle);
 
+void print_matrix(double const* const arr, int size_m, int size_n, int ldn);
+
+bool is_matrices_eq(double const* const arr1, double const* const arr2, int size_m, int size_n);
+
 #endif // BENCHMARK_COMMON_H

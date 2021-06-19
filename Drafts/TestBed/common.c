@@ -194,3 +194,30 @@ void print_libxsmm_dfsspmdm(libxsmm_dfsspmdm const* const handle) {
   printf("a_dense = %p\n", handle->a_dense);
   printf("&(handle->kernel) = %p\n", &(handle->kernel));
 }
+
+void print_matrix(double const* const arr, int size_m, int size_n, int ldn) {
+
+  assert(size_n <= ldn);
+
+  for ( int m = 0; m < size_m; m++ ) {
+    for ( int n = 0; n < size_n; n++ ) {
+      
+      double element = arr[m * ldn + n];
+      printf("%10.2e ", element);
+    }
+    printf("\n");
+  }
+}
+
+bool is_matrices_eq(double const* const arr1, double const* const arr2, int size_m, int size_n) {
+
+  for ( int m = 0; m < size_m; m++ ) {
+    for ( int n = 0; n < size_n; n++ ) {
+      if (arr1[m * size_n + n] != arr2[m * size_n + n]) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}

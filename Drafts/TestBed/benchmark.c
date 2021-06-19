@@ -7,10 +7,12 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include <cblas.h>
 #include <libxsmm.h>
 #include <libxsmm_main.h>
+#include <libxsmm_memory.h>
 
 #include "common.h"
 #include "xsmm_common.h"
@@ -33,6 +35,8 @@ int main(void) {
 
   // Load A matrix and sizes from file.
   load_matrix(a_path, &a_d, &k, &m);
+  printf("matrix A:\n");
+  print_matrix(a_d, m, k, k);
 
   int n = 192000;
   n = ( n / BLOCK_ALIGNMENT) * BLOCK_ALIGNMENT;
@@ -79,6 +83,32 @@ int main(void) {
   }
   printf("\n");
 
+  // check for correctness
+  libxsmm_dfsspmdm* dense_handle = (libxsmm_dfsspmdm*)malloc(sizeof(libxsmm_dfsspmdm));
+  if ( NULL == dense_handle ) {
+    printf("Cannot allocate dense_handle");
+    exit(1);
+  }
+
+  LIBXSMM_MEMZERO127(dense_handle);
+
+  double one = 1.0;
+  int flags = LIBXSMM_GEMM_FLAGS('N', 'N');
+  if ( beta == 0.0 && 1 != 0 ) {
+    flags |= LIBXSMM_GEMM_FLAG_ALIGN_C_NTS_HINT;
+  }
+
+  dense_handle->M = m;
+  dense_handle->N = BLOCK_ALIGNMENT;
+  dense_handle->K = k;
+  dense_handle->ldb = ldb;
+  dense_handle->ldc = ldc;
+  dense_handle->a_dense = a_d;
+  dense_handle->N_chunksize = 8;
+  dense_handle->kernel = libxsmm_dmmdispatch(dense_handle->N_chunksize, dense_handle->M, dense_handle->K, &ldb, &(dense_handle->K), &ldc, &one, &beta, &flags, (const int*)LIBXSMM_GEMM_PREFETCH_NONE);
+
+  double *c_dense_kernel = (double *) calloc(c_size, sizeof(double));
+  exec_xsmm(b_d, c_dense_kernel, n, dense_handle);
 
   struct benchmark_data b_data = benchmark_xsmm(b_d, c_xsmm_d, n, xsmm_d);
 
@@ -87,6 +117,10 @@ int main(void) {
   printf("---------------------------------------------------------------\n");
   printf("xsmm-reference best execution time: %.17g\n", b_data.fastest_time);
   printf("xsmm-reference avg execution time: %.17g\n", b_data.avg_iqr_time);
+
+  assert(is_matrices_eq(c_xsmm_d, c_dense_kernel, m, n));
+
+  printf("matrx_xmm == matrix_dense?: %d\n", is_matrices_eq(c_xsmm_d, c_dense_kernel, m, n));
 
   free(a_d);
   free(b_d);
